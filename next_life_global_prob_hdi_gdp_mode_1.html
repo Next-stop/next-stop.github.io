@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>下輩子是哪裡人｜按次輪迴直到達成心願（以各國出生人數為機率）</title>
+<style>
+:root { --bg:#0b1020; --card:#121a33; --accent:#6aa9ff; --muted:#9bb3d0; --ok:#39d98a; --warn:#f5a524; }
+*{box-sizing:border-box}
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans TC","PingFang TC",sans-serif;background:linear-gradient(180deg,#0b1020,#0e1430 40%,#0b1020);color:#e7ecf7}
+.wrap{max-width:1200px;margin:24px auto;padding:16px}
+h1{font-size:clamp(22px,3.2vw,34px);margin:0 0 12px}
+.sub{color:var(--muted);margin-bottom:18px}
+.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;position:relative;overflow:visible;z-index:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{appearance:none;border:1px solid rgba(255,255,255,.2);background:#0e1631;color:#e7ecf7;padding:10px 14px;border-radius:10px;cursor:pointer;transition:.2s;font-weight:600}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent);box-shadow:0 6px 18px rgba(106,169,255,.2)}
+.btn.pri{background:linear-gradient(135deg,#1a2a5f,#22377a);border-color:#3856b4}
+.btn.ok{background:linear-gradient(135deg,#11583b,#16724a);border-color:#2ba46c}
+.btn.warn{background:linear-gradient(135deg,#6c3d12,#8b5218);border-color:#c27b2a}
+select{background:#0a1023;color:#e7ecf7;border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px;min-width:240px;position:relative;z-index:2000}
+.pill{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.2);color:#d5e2ff;overflow:visible}
+.targets{display:flex;flex-direction:column;gap:8px;align-items:flex-start;overflow:visible}
+.stack{display:flex;flex-direction:column;gap:10px;overflow:visible}
+.list{max-height:240px;overflow:auto;border-top:1px dashed rgba(255,255,255,.15);padding-top:10px}
+.li{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+.meter{height:10px;background:#0a0f21;border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.bar{height:100%;background:linear-gradient(90deg,#6aa9ff,#9ac5ff)}
+.timeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
+.gen{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px}
+.gen.win{border-color:#39d98a;box-shadow:0 0 0 1px #39d98a inset}
+small{color:var(--muted)}
+.foot{margin-top:18px;color:#8fa8cf}
+.kbd{border:1px solid rgba(255,255,255,.2);border-bottom-width:3px;border-radius:6px;padding:1px 6px;font-weight:700}
+@media (max-width:880px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>下輩子是哪裡人？ <span class="pill">🎲 以各國 <b>2024</b> 出生人數當作機率</span></h1>
+  <div class="sub">機率以「<b>全球</b> 出生人數」為母體計算。你可以 A) 指定國家（最多 3 國），或 B) <b>不選國家</b>、僅用「GDP/人、HDI（與可選洲別）」作為條件，抽到「符合條件的一國」即視為成功。</div>
+
+  <div class="grid">
+    <div class="card stack">
+      <div class="stack">
+        <div class="targets">
+          <div class="pill" style="gap:12px;flex-wrap:wrap">
+            <span>從哪裡出生（最多選 3 國；若全不選＝使用條件模式）：</span>
+            <select id="wish1"><option value="">（不選）</option></select>
+            <select id="wish2"><option value="">（不選）</option></select>
+            <select id="wish3"><option value="">（不選）</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="pill" style="gap:12px"><span>洲別（可不選）：</span><select id="continent"><option value="">（全部洲別）</option></select></div>
+          <div class="pill" style="gap:12px"><span>GDP/人（USD）≥</span>
+            <select id="gdpMin">
+              <option value="0">（不限）</option>
+              <option value="5000">&gt; 5,000</option>
+              <option value="10000">&gt; 10,000</option>
+              <option value="30000">&gt; 30,000</option>
+              <option value="50000">&gt; 50,000</option>
+            </select>
+          </div>
+          <div class="pill" style="gap:12px"><span>人類發展指數 (HDI)：</span>
+            <select id="hdiLevel">
+              <option value="">（不限）</option>
+              <option value="0.902">Very high ≥ 0.902</option>
+              <option value="0.764">High ≥ 0.764</option>
+              <option value="0.64">Medium ≥ 0.640</option>
+              <option value="0.517">Low ≥ 0.517</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn pri" id="startBtn">開始（重置並抽第 1 世）</button>
+          <button class="btn ok" id="nextBtn" disabled>下一世（空白鍵）</button>
+          <button class="btn warn" id="autoBtn" disabled>自動播放</button>
+          <div class="pill" style="gap:12px"><span>速度(ms)：</span>
+            <select id="speed">
+              <option value="150">150</option>
+              <option value="300" selected>300</option>
+              <option value="500">500</option>
+              <option value="800">800</option>
+            </select>
+          </div>
+        </div>
+        <small>⚙️ 期望世數 = 1 / 聯合機率（指定國家加總，或條件集合加總；母體為全球）。</small>
+      </div>
+      <div class="list" id="topList"></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:baseline">
+        <div>
+          <div class="pill">目前目標模式：<b id="modeLabel">—</b></div>
+          <div class="pill">目標：<b id="wishLabel">—</b></div>
+          <div class="pill">聯合機率 p（全球母體）：<b id="pLabel">—</b></div>
+          <div class="pill">理論平均要 <b id="expTry">—</b> 世</div>
+        </div>
+        <div class="pill">目前已走：<b id="tries">0</b> 世</div>
+      </div>
+      <div id="targetsInfo" style="margin:8px 0;color:#9bb3d0"></div>
+      <div class="meter" style="margin-top:10px"><div id="progress" class="bar" style="width:0%"></div></div>
+      <div class="timeline" id="timeline"></div>
+      <div class="foot">提示：按 <span class="kbd">空白鍵</span> 等同「下一世」。按 <span class="kbd">S</span> 重新開始。</div>
+    </div>
+  </div>
+
+  <div class="foot">※ 「條件模式」會套用你選的 GDP/人與 HDI（以及洲別，若有選）。但聯合機率仍以全球出生總數為母體。</div>
+</div>
+
+<script>
+const ATTRS = [{"country": "不丹", "english": "Bhutan", "Continent": "亞洲", "gdp_pc": 3839.0, "HDI": 0.681, "births": 9958}, {"country": "中國", "english": "China", "Continent": "亞洲", "gdp_pc": 12951.0, "HDI": 0.788, "births": 9540000}, {"country": "中非共和國", "english": "Central African Republic", "Continent": "非洲", "gdp_pc": 496.0, "HDI": 0.387, "births": 238858}, {"country": "丹麥", "english": "Denmark", "Continent": "歐洲", "gdp_pc": 68454.0, "HDI": 0.952, "births": 57810}, {"country": "亞塞拜然", "english": "Azerbaijan", "Continent": "亞洲", "gdp_pc": 7133.0, "HDI": 0.76, "births": 125136}, {"country": "亞美尼亞", "english": "Armenia", "Continent": "亞洲", "gdp_pc": 8125.0, "HDI": 0.786, "births": 34668}, {"country": "以色列", "english": "Israel", "Continent": "亞洲", "gdp_pc": 52004.0, "HDI": 0.915, "births": 172312}, {"country": "伊拉克", "english": "Iraq", "Continent": "亞洲", "gdp_pc": 5965.0, "HDI": 0.673, "births": 1013218}, {"country": "伊朗", "english": "Iran", "Continent": "亞洲", "gdp_pc": 4466.0, "HDI": 0.78, "births": 1057948}, {"country": "俄羅斯", "english": "Russia", "Continent": "歐洲", "gdp_pc": 14159.0, "HDI": 0.821, "births": 1220000}, {"country": "保加利亞", "english": "Bulgaria", "Continent": "歐洲", "gdp_pc": 15884.0, "HDI": 0.799, "births": 53428}, {"country": "克羅埃西亞", "english": "Croatia", "Continent": "歐洲", "gdp_pc": 21865.0, "HDI": 0.878, "births": 32069}, {"country": "冰島", "english": "Iceland", "Continent": "歐洲", "gdp_pc": 79960.0, "HDI": 0.959, "births": 4311}, {"country": "列支敦斯登", "english": "Liechtenstein", "Continent": "歐洲", "gdp_pc": 207974.0, "HDI": 0.942, "births": 371}, {"country": "利比亞", "english": "Libya", "Continent": "非洲", "gdp_pc": 6173.0, "HDI": 0.746, "births": 124371}, {"country": "剛果共和國", "english": "Congo", "Continent": "非洲", "gdp_pc": 2478.0, "HDI": 0.593, "births": 189365}, {"country": "剛果民主共和國", "english": "Democratic Republic of the Congo", "Continent": "非洲", "gdp_pc": 633.0, "HDI": 0.481, "births": 4369683}, {"country": "加勒比海荷蘭", "english": "Caribbean Netherlands", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 280}, {"country": "加彭", "english": "Gabon", "Continent": "非洲", "gdp_pc": 8071.0, "HDI": 0.693, "births": 68745}, {"country": "加拿大", "english": "Canada", "Continent": "北美洲", "gdp_pc": 54220.0, "HDI": 0.935, "births": 356745}, {"country": "匈牙利", "english": "Hungary", "Continent": "歐洲", "gdp_pc": 22312.0, "HDI": 0.851, "births": 85373}, {"country": "北韓", "english": "North Korea", "Continent": "亞洲", "gdp_pc": 1261.0, "HDI": 0.766, "births": 342038}, {"country": "北馬其頓", "english": "North Macedonia", "Continent": "歐洲", "gdp_pc": 8624.0, "HDI": 0.765, "births": 16878}, {"country": "北馬裡亞納群島", "english": "Northern Mariana Islands", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0, "births": 583}, {"country": "千里達及托巴哥", "english": "Trinidad and Tobago", "Continent": "北美洲", "gdp_pc": 18639.0, "HDI": 0.814, "births": 16094}, {"country": "南蘇丹", "english": "South Sudan", "Continent": "非洲", "gdp_pc": 326.0, "HDI": 0.381, "births": 328308}, {"country": "南非", "english": "South Africa", "Continent": "非洲", "gdp_pc": 6023.0, "HDI": 0.717, "births": 1186793}, {"country": "卡達", "english": "Qatar", "Continent": "亞洲", "gdp_pc": 80196.0, "HDI": 0.875, "births": 29516}, {"country": "印尼", "english": "Indonesia", "Continent": "亞洲", "gdp_pc": 4876.0, "HDI": 0.713, "births": 4482359}, {"country": "印度", "english": "India", "Continent": "亞洲", "gdp_pc": 2530.0, "HDI": 0.644, "births": 23413498}, {"country": "厄利垂亞", "english": "Eritrea", "Continent": "非洲", "gdp_pc": 701.0, "HDI": 0.493, "births": 99058}, {"country": "厄瓜多", "english": "Ecuador", "Continent": "南美洲", "gdp_pc": 6738.0, "HDI": 0.765, "births": 215714}, {"country": "古巴", "english": "Cuba", "Continent": "北美洲", "gdp_pc": 6985.0, "HDI": 0.764, "births": 71374}, {"country": "台灣", "english": "Taiwan", "Continent": "亞洲", "gdp_pc": 34426.0, "HDI": 0.926, "births": 134856}, {"country": "史瓦帝尼", "english": "Eswatini", "Continent": "非洲", "gdp_pc": 3742.0, "HDI": 0.61, "births": 29622}, {"country": "吉布地", "english": "Djibouti", "Continent": "非洲", "gdp_pc": 3398.0, "HDI": 0.515, "births": 23946}, {"country": "吉爾吉斯斯坦", "english": "Kyrgyzstan", "Continent": "亞洲", "gdp_pc": 2500.0, "HDI": 0.701, "births": 150759}, {"country": "吉里巴斯", "english": "Kiribati", "Continent": "大洋洲", "gdp_pc": 2178.0, "HDI": 0.628, "births": 3421}, {"country": "吐瓦魯", "english": "Tuvalu", "Continent": "大洋洲", "gdp_pc": 6345.0, "HDI": 0.653, "births": 226}, {"country": "哈薩克", "english": "Kazakhstan", "Continent": "亞洲", "gdp_pc": 12879.0, "HDI": 0.802, "births": 365900}, {"country": "哥倫比亞", "english": "Colombia", "Continent": "南美洲", "gdp_pc": 7001.0, "HDI": 0.758, "births": 445011}, {"country": "哥斯大黎加", "english": "Costa Rica", "Continent": "北美洲", "gdp_pc": 16942.0, "HDI": 0.806, "births": 45825}, {"country": "喀麥隆", "english": "Cameroon", "Continent": "非洲", "gdp_pc": 1737.0, "HDI": 0.587, "births": 957392}, {"country": "喬治亞州", "english": "Georgia", "Continent": "亞洲", "gdp_pc": 8284.0, "HDI": 0.814, "births": 43765}, {"country": "團圓", "english": "Réunion", "Continent": "非洲", "gdp_pc": 0, "HDI": 0, "births": 12003}, {"country": "土庫曼", "english": "Turkmenistan", "Continent": "亞洲", "gdp_pc": 8233.0, "HDI": 0.744, "births": 160100}, {"country": "土耳其", "english": "Turkey", "Continent": "亞洲", "gdp_pc": 13106.0, "HDI": 0.853, "births": 937369}, {"country": "坦尚尼亞", "english": "Tanzania", "Continent": "非洲", "gdp_pc": 1224.0, "HDI": 0.532, "births": 2346391}, {"country": "埃及", "english": "Egypt", "Continent": "非洲", "gdp_pc": 3457.0, "HDI": 0.728, "births": 1968000}, {"country": "塔吉克", "english": "Tajikistan", "Continent": "亞洲", "gdp_pc": 1178.0, "HDI": 0.679, "births": 271420}, {"country": "塞內加爾", "english": "Senegal", "Continent": "非洲", "gdp_pc": 1698.0, "HDI": 0.517, "births": 531890}, {"country": "塞席爾", "english": "Seychelles", "Continent": "非洲", "gdp_pc": 18263.0, "HDI": 0.802, "births": 1744}, {"country": "塞爾維亞", "english": "Serbia", "Continent": "歐洲", "gdp_pc": 12282.0, "HDI": 0.805, "births": 60845}, {"country": "墨西哥", "english": "Mexico", "Continent": "北美洲", "gdp_pc": 13826.0, "HDI": 0.781, "births": 1672227}, {"country": "多哥", "english": "Togo", "Continent": "非洲", "gdp_pc": 986.0, "HDI": 0.547, "births": 289759}, {"country": "多明尼加", "english": "Dominica", "Continent": "北美洲", "gdp_pc": 9913.0, "HDI": 0.74, "births": 738}, {"country": "多明尼加共和國", "english": "Dominican Republic", "Continent": "北美洲", "gdp_pc": 10630.0, "HDI": 0.766, "births": 203183}, {"country": "奈及利亞", "english": "Nigeria", "Continent": "非洲", "gdp_pc": 1597.0, "HDI": 0.548, "births": 7509758}, {"country": "奧地利", "english": "Austria", "Continent": "歐洲", "gdp_pc": 56034.0, "HDI": 0.926, "births": 77238}, {"country": "委內瑞拉", "english": "Venezuela", "Continent": "南美洲", "gdp_pc": 1823.0, "HDI": 0.699, "births": 426984}, {"country": "威爾斯", "english": "Wales", "Continent": "歐洲", "gdp_pc": 52637.0, "HDI": 0.91, "births": 26620}, {"country": "孟加拉", "english": "Bangladesh", "Continent": "亞洲", "gdp_pc": 2551.0, "HDI": 0.67, "births": 3020000}, {"country": "安哥拉", "english": "Angola", "Continent": "非洲", "gdp_pc": 2310.0, "HDI": 0.591, "births": 1381370}, {"country": "安圭拉", "english": "Anguilla", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 130}, {"country": "安地卡及巴布達", "english": "Antigua and Barbuda", "Continent": "北美洲", "gdp_pc": 21495.0, "HDI": 0.826, "births": 1106}, {"country": "安道爾", "english": "Andorra", "Continent": "歐洲", "gdp_pc": 46812.0, "HDI": 0.884, "births": 555}, {"country": "宏都拉斯", "english": "Honduras", "Continent": "北美洲", "gdp_pc": 3227.0, "HDI": 0.624, "births": 233793}, {"country": "密克羅尼西亞聯邦", "english": "Federated States of Micronesia", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0.62, "births": 2512}, {"country": "寮國", "english": "Laos", "Continent": "亞洲", "gdp_pc": 2100.0, "HDI": 0.617, "births": 163043}, {"country": "尚比亞", "english": "Zambia", "Continent": "非洲", "gdp_pc": 1331.0, "HDI": 0.569, "births": 685565}, {"country": "尼加拉瓜", "english": "Nicaragua", "Continent": "北美洲", "gdp_pc": 2609.0, "HDI": 0.669, "births": 132214}, {"country": "尼日", "english": "Niger", "Continent": "非洲", "gdp_pc": 638.0, "HDI": 0.394, "births": 1095892}, {"country": "尼泊爾", "english": "Nepal", "Continent": "亞洲", "gdp_pc": 1382.0, "HDI": 0.601, "births": 574297}, {"country": "巴勒斯坦", "english": "Palestine", "Continent": "亞洲", "gdp_pc": 3464.0, "HDI": 0.716, "births": 146384}, {"country": "巴哈馬", "english": "Bahamas", "Continent": "北美洲", "gdp_pc": 3525.0, "HDI": 0.82, "births": 4335}, {"country": "巴基斯坦", "english": "Pakistan", "Continent": "亞洲", "gdp_pc": 1365.0, "HDI": 0.54, "births": 6882058}, {"country": "巴布亞紐幾內亞", "english": "Papua New Guinea", "Continent": "大洋洲", "gdp_pc": 2966.0, "HDI": 0.568, "births": 255331}, {"country": "巴拉圭", "english": "Paraguay", "Continent": "南美洲", "gdp_pc": 6300.0, "HDI": 0.731, "births": 136778}, {"country": "巴拿馬", "english": "Panama", "Continent": "北美洲", "gdp_pc": 18686.0, "HDI": 0.82, "births": 59729}, {"country": "巴林", "english": "Bahrain", "Continent": "亞洲", "gdp_pc": 29290.0, "HDI": 0.888, "births": 19558}, {"country": "巴西", "english": "Brazil", "Continent": "南美洲", "gdp_pc": 10378.0, "HDI": 0.76, "births": 2520000}, {"country": "巴貝多", "english": "Barbados", "Continent": "北美洲", "gdp_pc": 23804.0, "HDI": 0.809, "births": 3155}, {"country": "布吉納法索", "english": "Burkina Faso", "Continent": "非洲", "gdp_pc": 883.0, "HDI": 0.438, "births": 728612}, {"country": "希臘", "english": "Greece", "Continent": "歐洲", "gdp_pc": 23401.0, "HDI": 0.893, "births": 62624}, {"country": "帛琉", "english": "Palau", "Continent": "大洋洲", "gdp_pc": 15899.0, "HDI": 0.797, "births": 193}, {"country": "幾內亞", "english": "Guinea", "Continent": "非洲", "gdp_pc": 1555.0, "HDI": 0.471, "births": 487595}, {"country": "幾內亞比紹", "english": "Guinea-Bissau", "Continent": "非洲", "gdp_pc": 965.0, "HDI": 0.483, "births": 64679}, {"country": "庫克群島", "english": "Cook Islands", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0, "births": 178}, {"country": "庫拉索", "english": "Curaçao", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 1394}, {"country": "德國", "english": "Germany", "Continent": "歐洲", "gdp_pc": 53940.0, "HDI": 0.95, "births": 677117}, {"country": "愛沙尼亞", "english": "Estonia", "Continent": "歐洲", "gdp_pc": 30133.0, "HDI": 0.899, "births": 9646}, {"country": "愛爾蘭", "english": "Ireland", "Continent": "歐洲", "gdp_pc": 103888.0, "HDI": 0.95, "births": 54062}, {"country": "托克勞", "english": "Tokelau", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0, "births": 47}, {"country": "拉脫維亞", "english": "Latvia", "Continent": "歐洲", "gdp_pc": 22676.0, "HDI": 0.879, "births": 14250}, {"country": "挪威", "english": "Norway", "Continent": "歐洲", "gdp_pc": 87497.0, "HDI": 0.966, "births": 51545}, {"country": "捷克共和國", "english": "Czech", "Continent": "歐洲", "gdp_pc": 31591.0, "HDI": 0.895, "births": 84311}, {"country": "摩洛哥", "english": "Morocco", "Continent": "非洲", "gdp_pc": 3771.0, "HDI": 0.698, "births": 629832}, {"country": "摩爾多瓦", "english": "Moldova", "Continent": "歐洲", "gdp_pc": 6800.0, "HDI": 0.763, "births": 32986}, {"country": "摩納哥", "english": "Monaco", "Continent": "歐洲", "gdp_pc": 256581.0, "HDI": 0.946, "births": 368}, {"country": "敘利亞", "english": "Syria", "Continent": "亞洲", "gdp_pc": 847.0, "HDI": 0.557, "births": 521601}, {"country": "斐濟", "english": "Fiji", "Continent": "大洋洲", "gdp_pc": 5889.0, "HDI": 0.729, "births": 16631}, {"country": "斯洛伐克", "english": "Slovakia", "Continent": "歐洲", "gdp_pc": 28180.0, "HDI": 0.855, "births": 46241}, {"country": "斯洛維尼亞", "english": "Slovenia", "Continent": "歐洲", "gdp_pc": 32610.0, "HDI": 0.926, "births": 16875}, {"country": "斯里蘭卡", "english": "Sri Lanka", "Continent": "亞洲", "gdp_pc": 3799.0, "HDI": 0.78, "births": 228091}, {"country": "新加坡", "english": "Singapore", "Continent": "亞洲", "gdp_pc": 85412.0, "HDI": 0.949, "births": 33703}, {"country": "新喀裡多尼亞", "english": "New Caledonia", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0, "births": 4134}, {"country": "日本", "english": "Japan", "Continent": "亞洲", "gdp_pc": 33836.0, "HDI": 0.92, "births": 720988}, {"country": "智利", "english": "Chile", "Continent": "南美洲", "gdp_pc": 17067.0, "HDI": 0.86, "births": 176196}, {"country": "東加", "english": "Tonga", "Continent": "大洋洲", "gdp_pc": 4864.0, "HDI": 0.739, "births": 2418}, {"country": "東帝汶", "english": "Timor-Leste", "Continent": "亞洲", "gdp_pc": 1503.0, "HDI": 0.566, "births": 30561}, {"country": "查德", "english": "Chad", "Continent": "非洲", "gdp_pc": 989.0, "HDI": 0.394, "births": 819054}, {"country": "柬埔寨", "english": "Cambodia", "Continent": "亞洲", "gdp_pc": 2430.0, "HDI": 0.6, "births": 284143}, {"country": "格恩西島", "english": "Guernsey", "Continent": "歐洲", "gdp_pc": 0, "HDI": 0, "births": 521}, {"country": "格瑞那達", "english": "Grenada", "Continent": "北美洲", "gdp_pc": 11308.0, "HDI": 0.793, "births": 1371}, {"country": "格陵蘭", "english": "Greenland", "Continent": "北美洲", "gdp_pc": 58499.0, "HDI": 0.869, "births": 789}, {"country": "梵蒂岡城", "english": "Vatican City", "Continent": "歐洲", "gdp_pc": 0, "HDI": 0, "births": 0}, {"country": "模里西斯", "english": "Mauritius", "Continent": "非洲", "gdp_pc": 11182.0, "HDI": 0.796, "births": 11804}, {"country": "比利時", "english": "Belgium", "Continent": "歐洲", "gdp_pc": 54690.0, "HDI": 0.942, "births": 101686}, {"country": "汶萊", "english": "Brunei", "Continent": "亞洲", "gdp_pc": 34970.0, "HDI": 0.823, "births": 6237}, {"country": "沙烏地阿拉伯", "english": "Saudi Arabia", "Continent": "亞洲", "gdp_pc": 36157.0, "HDI": 0.875, "births": 546038}, {"country": "法國", "english": "France", "Continent": "歐洲", "gdp_pc": 44691.0, "HDI": 0.91, "births": 638891}, {"country": "法屬圭亞那", "english": "French Guiana", "Continent": "南美洲", "gdp_pc": 0, "HDI": 0, "births": 7707}, {"country": "法屬玻里尼西亞", "english": "French Polynesia", "Continent": "大洋洲", "gdp_pc": 22774.0, "HDI": 0.737, "births": 3066}, {"country": "法羅群島", "english": "Faroe Islands", "Continent": "歐洲", "gdp_pc": 71774.0, "HDI": 0.95, "births": 690}, {"country": "波士尼亞與赫塞哥維納", "english": "Bosnia and Herzegovina", "Continent": "歐洲", "gdp_pc": 8663.0, "HDI": 0.779, "births": 24569}, {"country": "波多黎各", "english": "Puerto Rico", "Continent": "北美洲", "gdp_pc": 37930.0, "HDI": 0.868, "births": 18851}, {"country": "波札那", "english": "Botswana", "Continent": "非洲", "gdp_pc": 7826.0, "HDI": 0.708, "births": 61294}, {"country": "波蘭", "english": "Poland", "Continent": "歐洲", "gdp_pc": 22145.0, "HDI": 0.881, "births": 251800}, {"country": "泰國", "english": "Thailand", "Continent": "亞洲", "gdp_pc": 7195.0, "HDI": 0.803, "births": 462240}, {"country": "海地", "english": "Haiti", "Continent": "北美洲", "gdp_pc": 1706.0, "HDI": 0.552, "births": 258348}, {"country": "澳洲", "english": "Australia", "Continent": "大洋洲", "gdp_pc": 64836.0, "HDI": 0.946, "births": 286998}, {"country": "澳門", "english": "Macau", "Continent": "亞洲", "gdp_pc": 72910.0, "HDI": 0.922, "births": 3607}, {"country": "烏克蘭", "english": "Ukraine", "Continent": "歐洲", "gdp_pc": 5140.0, "HDI": 0.734, "births": 176679}, {"country": "烏幹達", "english": "Uganda", "Continent": "非洲", "gdp_pc": 1002.0, "HDI": 0.55, "births": 1712750}, {"country": "烏拉圭", "english": "Uruguay", "Continent": "南美洲", "gdp_pc": 23019.0, "HDI": 0.83, "births": 29899}, {"country": "烏茲別克", "english": "Uzbekistan", "Continent": "亞洲", "gdp_pc": 2879.0, "HDI": 0.727, "births": 926400}, {"country": "牙買加", "english": "Jamaica", "Continent": "北美洲", "gdp_pc": 6840.0, "HDI": 0.706, "births": 33007}, {"country": "特克斯和凱科斯群島", "english": "Turks and Caicos Islands", "Continent": "北美洲", "gdp_pc": 35470.0, "HDI": 0.873, "births": 496}, {"country": "獅子山", "english": "Sierra Leone", "Continent": "非洲", "gdp_pc": 758.0, "HDI": 0.458, "births": 258903}, {"country": "玻利維亞", "english": "Bolivia", "Continent": "南美洲", "gdp_pc": 3686.0, "HDI": 0.698, "births": 260151}, {"country": "球衣", "english": "Jersey", "Continent": "歐洲", "gdp_pc": 0, "HDI": 0.985, "births": 853}, {"country": "瑞典", "english": "Sweden", "Continent": "歐洲", "gdp_pc": 55567.0, "HDI": 0.952, "births": 97915}, {"country": "瑞士", "english": "Switzerland", "Continent": "歐洲", "gdp_pc": 100632.0, "HDI": 0.967, "births": 78256}, {"country": "瓜地馬拉", "english": "Guatemala", "Continent": "北美洲", "gdp_pc": 5758.0, "HDI": 0.629, "births": 299256}, {"country": "瓜德羅普島", "english": "Guadeloupe", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 4233}, {"country": "瓦利斯和富圖納", "english": "Wallis and Futuna", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0, "births": 98}, {"country": "甘比亞", "english": "Gambia", "Continent": "非洲", "gdp_pc": 888.0, "HDI": 0.495, "births": 82092}, {"country": "白俄羅斯", "english": "Belarus", "Continent": "歐洲", "gdp_pc": 7897.0, "HDI": 0.801, "births": 58938}, {"country": "百慕達", "english": "Bermuda", "Continent": "北美洲", "gdp_pc": 132604.0, "HDI": 0.981, "births": 521}, {"country": "盧森堡", "english": "Luxembourg", "Continent": "歐洲", "gdp_pc": 131408.0, "HDI": 0.927, "births": 6946}, {"country": "直布羅陀", "english": "Gibraltar", "Continent": "歐洲", "gdp_pc": 43000.0, "HDI": 0.961, "births": 464}, {"country": "福克蘭群島", "english": "Falkland Islands", "Continent": "南美洲", "gdp_pc": 0, "HDI": 0, "births": 39}, {"country": "科威特", "english": "Kuwait", "Continent": "亞洲", "gdp_pc": 34076.0, "HDI": 0.847, "births": 49342}, {"country": "科特迪瓦", "english": "Ivory Coast", "Continent": "非洲", "gdp_pc": 2728.0, "HDI": 0.582, "births": 997001}, {"country": "科索沃", "english": "Kosovo", "Continent": "歐洲", "gdp_pc": 6221.0, "HDI": 0.742, "births": 20514}, {"country": "秘魯", "english": "Peru", "Continent": "南美洲", "gdp_pc": 7888.0, "HDI": 0.762, "births": 539623}, {"country": "突尼西亞", "english": "Tunisia", "Continent": "非洲", "gdp_pc": 3950.0, "HDI": 0.732, "births": 133322}, {"country": "立陶宛", "english": "Lithuania", "Continent": "歐洲", "gdp_pc": 27786.0, "HDI": 0.879, "births": 21434}, {"country": "約旦", "english": "Jordan", "Continent": "亞洲", "gdp_pc": 4466.0, "HDI": 0.736, "births": 235776}, {"country": "納米比亞", "english": "Namibia", "Continent": "非洲", "gdp_pc": 4188.0, "HDI": 0.61, "births": 76715}, {"country": "紐埃", "english": "Niue", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0, "births": 25}, {"country": "紐西蘭", "english": "New Zealand", "Continent": "大洋洲", "gdp_pc": 48655.0, "HDI": 0.939, "births": 59236}, {"country": "索羅門群島", "english": "Solomon Islands", "Continent": "大洋洲", "gdp_pc": 2076.0, "HDI": 0.562, "births": 21548}, {"country": "索馬利亞", "english": "Somalia", "Continent": "非洲", "gdp_pc": 597.0, "HDI": 0.38, "births": 788763}, {"country": "維德角", "english": "Cape Verde", "Continent": "非洲", "gdp_pc": 0, "HDI": 0, "births": 6440}, {"country": "緬甸", "english": "Myanmar", "Continent": "亞洲", "gdp_pc": 1233.0, "HDI": 0.608, "births": 903822}, {"country": "羅馬尼亞", "english": "Romania", "Continent": "歐洲", "gdp_pc": 18404.0, "HDI": 0.827, "births": 148916}, {"country": "美國", "english": "United States", "Continent": "北美洲", "gdp_pc": 82305.0, "HDI": 0.927, "births": 3622673}, {"country": "美屬維京群島", "english": "United States Virgin Islands", "Continent": "北美洲", "gdp_pc": 38136.0, "HDI": 0.894, "births": 959}, {"country": "美屬薩摩亞", "english": "American Samoa", "Continent": "大洋洲", "gdp_pc": 0, "HDI": 0, "births": 731}, {"country": "義大利", "english": "Italy", "Continent": "歐洲", "gdp_pc": 39065.0, "HDI": 0.906, "births": 370000}, {"country": "聖克里斯多福及尼維斯", "english": "Saint Kitts and Nevis", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0.838, "births": 549}, {"country": "聖多美和普林西比", "english": "São Tomé and Príncipe", "Continent": "非洲", "gdp_pc": 0, "HDI": 0, "births": 6507}, {"country": "聖巴泰勒米", "english": "Saint Barthélemy", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 53}, {"country": "聖文森及格瑞那丁", "english": "Saint Vincent and the Grenadines", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0.772, "births": 1232}, {"country": "聖皮埃爾和密克隆群島", "english": "Saint Pierre and Miquelon", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 30}, {"country": "聖赫勒拿島、阿森松島和特里斯坦-達庫尼亞島", "english": "Saint Helena, Ascension and Tristan da Cunha", "Continent": "非洲", "gdp_pc": 0, "HDI": 0, "births": 39}, {"country": "聖露西亞", "english": "Saint Lucia", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0.725, "births": 2019}, {"country": "聖馬丁", "english": "Saint Martin", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0.702, "births": 470}, {"country": "聖馬丁島", "english": "Sint Maarten", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 390}, {"country": "聖馬利諾", "english": "San Marino", "Continent": "歐洲", "gdp_pc": 59407.0, "HDI": 0.867, "births": 200}, {"country": "肯亞", "english": "Kenya", "Continent": "非洲", "gdp_pc": 1952.0, "HDI": 0.601, "births": 1110563}, {"country": "芬蘭", "english": "Finland", "Continent": "歐洲", "gdp_pc": 52822.0, "HDI": 0.942, "births": 43556}, {"country": "英國", "english": "United Kingdom", "Continent": "歐洲", "gdp_pc": 49201.0, "HDI": 0.94, "births": 656847}, {"country": "英屬維京群島", "english": "British Virgin Islands", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0.945, "births": 325}, {"country": "茅利塔尼亞", "english": "Mauritania", "Continent": "非洲", "gdp_pc": 2121.0, "HDI": 0.54, "births": 172885}, {"country": "荷蘭", "english": "Netherlands", "Continent": "歐洲", "gdp_pc": 64572.0, "HDI": 0.946, "births": 167842}, {"country": "莫三比克", "english": "Mozambique", "Continent": "非洲", "gdp_pc": 623.0, "HDI": 0.461, "births": 1260855}, {"country": "菲律賓", "english": "Philippines", "Continent": "亞洲", "gdp_pc": 3804.0, "HDI": 0.71, "births": 1204070}, {"country": "萬那杜", "english": "Vanuatu", "Continent": "大洋洲", "gdp_pc": 3515.0, "HDI": 0.614, "births": 8988}, {"country": "葉門", "english": "Yemen", "Continent": "亞洲", "gdp_pc": 2077.0, "HDI": 0.424, "births": 1386914}, {"country": "葛摩", "english": "Comoros", "Continent": "非洲", "gdp_pc": 1682.0, "HDI": 0.586, "births": 24366}, {"country": "葡萄牙", "english": "Portugal", "Continent": "歐洲", "gdp_pc": 27386.0, "HDI": 0.874, "births": 84650}, {"country": "蒙古", "english": "Mongolia", "Continent": "亞洲", "gdp_pc": 5839.0, "HDI": 0.741, "births": 60213}, {"country": "蒙特內哥羅", "english": "Montenegro", "Continent": "歐洲", "gdp_pc": 12077.0, "HDI": 0.844, "births": 6981}, {"country": "蒙特塞拉特", "english": "Montserrat", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 39}, {"country": "蒲隆地", "english": "Burundi", "Continent": "非洲", "gdp_pc": 192.0, "HDI": 0.42, "births": 460882}, {"country": "蓋亞那", "english": "Guyana", "Continent": "南美洲", "gdp_pc": 20474.0, "HDI": 0.742, "births": 16764}, {"country": "薩摩亞", "english": "Samoa", "Continent": "大洋洲", "gdp_pc": 4330.0, "HDI": 0.702, "births": 5503}, {"country": "薩爾瓦多", "english": "El Salvador", "Continent": "北美洲", "gdp_pc": 5365.0, "HDI": 0.674, "births": 99428}, {"country": "蘇丹", "english": "Sudan", "Continent": "非洲", "gdp_pc": 797.0, "HDI": 0.516, "births": 1682049}, {"country": "蘇利南", "english": "Suriname", "Continent": "南美洲", "gdp_pc": 5494.0, "HDI": 0.69, "births": 10879}, {"country": "衣索比亞", "english": "Ethiopia", "Continent": "非洲", "gdp_pc": 994.0, "HDI": 0.492, "births": 4105685}, {"country": "西撒哈拉", "english": "Western Sahara", "Continent": "非洲", "gdp_pc": 0, "HDI": 0, "births": 8987}, {"country": "西班牙", "english": "Spain", "Continent": "歐洲", "gdp_pc": 33509.0, "HDI": 0.911, "births": 322034}, {"country": "諾魯", "english": "Nauru", "Continent": "大洋洲", "gdp_pc": 12754.0, "HDI": 0.696, "births": 303}, {"country": "貝南", "english": "Benin", "Continent": "非洲", "gdp_pc": 1394.0, "HDI": 0.504, "births": 478062}, {"country": "貝里斯", "english": "Belize", "Continent": "北美洲", "gdp_pc": 7460.0, "HDI": 0.7, "births": 7410}, {"country": "賴比瑞亞", "english": "Liberia", "Continent": "非洲", "gdp_pc": 799.0, "HDI": 0.487, "births": 170065}, {"country": "賴索托", "english": "Lesotho", "Continent": "非洲", "gdp_pc": 916.0, "HDI": 0.521, "births": 55728}, {"country": "賽普勒斯", "english": "Cyprus", "Continent": "亞洲", "gdp_pc": 36551.0, "HDI": 0.907, "births": 14524}, {"country": "赤道幾內亞", "english": "Equatorial Guinea", "Continent": "非洲", "gdp_pc": 6678.0, "HDI": 0.65, "births": 54694}, {"country": "越南", "english": "Vietnam", "Continent": "亞洲", "gdp_pc": 4323.0, "HDI": 0.726, "births": 1387961}, {"country": "辛巴威", "english": "Zimbabwe", "Continent": "非洲", "gdp_pc": 2156.0, "HDI": 0.55, "births": 496917}, {"country": "迦納", "english": "Ghana", "Continent": "非洲", "gdp_pc": 2384.0, "HDI": 0.602, "births": 888947}, {"country": "開曼群島", "english": "Cayman Islands", "Continent": "北美洲", "gdp_pc": 97750.0, "HDI": 0.983, "births": 865}, {"country": "關島", "english": "Guam", "Continent": "大洋洲", "gdp_pc": 37387.0, "HDI": 0.901, "births": 2941}, {"country": "阿富汗", "english": "Afghanistan", "Continent": "亞洲", "gdp_pc": 414.0, "HDI": 0.462, "births": 1469029}, {"country": "阿曼", "english": "Oman", "Continent": "亞洲", "gdp_pc": 20972.0, "HDI": 0.819, "births": 85065}, {"country": "阿根廷", "english": "Argentina", "Continent": "南美洲", "gdp_pc": 14187.0, "HDI": 0.849, "births": 460902}, {"country": "阿爾及利亞", "english": "Algeria", "Continent": "非洲", "gdp_pc": 5364.0, "HDI": 0.745, "births": 905981}, {"country": "阿爾巴尼亞", "english": "Albania", "Continent": "歐洲", "gdp_pc": 8575.0, "HDI": 0.789, "births": 28803}, {"country": "阿魯巴", "english": "Aruba", "Continent": "北美洲", "gdp_pc": 33985.0, "HDI": 0.908, "births": 1020}, {"country": "阿拉伯聯合大公國", "english": "United Arab Emirates", "Continent": "亞洲", "gdp_pc": 49041.0, "HDI": 0.937, "births": 104015}, {"country": "韓國", "english": "South Korea", "Continent": "亞洲", "gdp_pc": 33121.0, "HDI": 0.929, "births": 238300}, {"country": "香港", "english": "Hong Kong", "Continent": "亞洲", "gdp_pc": 56031.0, "HDI": 0.956, "births": 36700}, {"country": "馬來西亞", "english": "Malaysia", "Continent": "亞洲", "gdp_pc": 11379.0, "HDI": 0.807, "births": 435989}, {"country": "馬恩島", "english": "Isle of Man", "Continent": "歐洲", "gdp_pc": 0, "HDI": 0, "births": 702}, {"country": "馬拉威", "english": "Malawi", "Continent": "非洲", "gdp_pc": 602.0, "HDI": 0.508, "births": 662289}, {"country": "馬提尼克島", "english": "Martinique", "Continent": "北美洲", "gdp_pc": 0, "HDI": 0, "births": 3728}, {"country": "馬爾他", "english": "Malta", "Continent": "歐洲", "gdp_pc": 40182.0, "HDI": 0.915, "births": 4213}, {"country": "馬爾地夫", "english": "Maldives", "Continent": "亞洲", "gdp_pc": 12530.0, "HDI": 0.762, "births": 5795}, {"country": "馬約特島", "english": "Mayotte", "Continent": "非洲", "gdp_pc": 0, "HDI": 0, "births": 11186}, {"country": "馬紹爾群島", "english": "Marshall Islands", "Continent": "大洋洲", "gdp_pc": 6678.0, "HDI": 0.731, "births": 821}, {"country": "馬裡", "english": "Mali", "Continent": "非洲", "gdp_pc": 1036.0, "HDI": 0.41, "births": 951445}, {"country": "馬達加斯加", "english": "Madagascar", "Continent": "非洲", "gdp_pc": 509.0, "HDI": 0.487, "births": 1001244}, {"country": "黎巴嫩", "english": "Lebanon", "Continent": "亞洲", "gdp_pc": 3478.0, "HDI": 0.723, "births": 93205}, {"country": "盧安達", "english": "Rwanda", "Continent": "非洲", "gdp_pc": 1027.0, "HDI": 0.548, "births": 395578}];
+
+(function(){
+  function ready(fn){ if(document.readyState!=='loading'){fn();} else {document.addEventListener('DOMContentLoaded',fn);} }
+  function fmt(n){return Number(n||0).toLocaleString('zh-TW');}
+  function uniq(arr){return Array.from(new Set(arr));}
+
+  ready(function(){
+    const sourceGlobal = Array.isArray(ATTRS) ? ATTRS.slice() : [];
+    const totalBirthsGlobal = sourceGlobal.filter(d => d.births > 0).reduce((s,d)=> s + d.births, 0);
+    let filtered = sourceGlobal.slice();
+    let winner=null, playing=false, triesCount=0;
+
+    const els = {
+      wish1:document.getElementById('wish1'),
+      wish2:document.getElementById('wish2'),
+      wish3:document.getElementById('wish3'),
+      continent:document.getElementById('continent'),
+      gdpMin:document.getElementById('gdpMin'),
+      hdiLevel:document.getElementById('hdiLevel'),
+      wishLabel:document.getElementById('wishLabel'), pLabel:document.getElementById('pLabel'), expTry:document.getElementById('expTry'),
+      modeLabel:document.getElementById('modeLabel'),
+      startBtn:document.getElementById('startBtn'), nextBtn:document.getElementById('nextBtn'), autoBtn:document.getElementById('autoBtn'), speed:document.getElementById('speed'),
+      topList:document.getElementById('topList'), timeline:document.getElementById('timeline'),
+      tries:document.getElementById('tries'), progress:document.getElementById('progress'), targetsInfo:document.getElementById('targetsInfo')
+    };
+
+    function buildContinentOptions(){
+      const cons = uniq(sourceGlobal.map(d=>d.Continent).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'zh-TW'));
+      let html = '<option value="">（全部洲別）</option>';
+      cons.forEach(c=> html += '<option>'+c+'</option>');
+      els.continent.innerHTML = html;
+    }
+
+    function applyFilters(){
+      const con = els.continent.value;
+      const gmin = Number(els.gdpMin.value || 0);
+      const hmin = Number(els.hdiLevel.value || 0);
+      filtered = sourceGlobal.filter(d =>
+        (con? d.Continent===con : true) &&
+		(gmin > 0 ? d.gdp_pc > gmin : true) &&   // gmin==0 => 不篩 GDP/人，空值(0)也保留
+		(hmin > 0 ? d.HDI >= hmin : true)        // hmin==0 => 不篩 HDI，空值(0)也保留
+      );
+      refreshWishOptions();
+      refreshTop();
+      updateGoalUI();
+    }
+
+    function refreshWishOptions(){
+      const sorted=[...filtered].sort((a,b)=>String(a.country).localeCompare(String(b.country),'zh-TW'));
+      let html='<option value="">（不選）</option>';
+      sorted.forEach(d=> html += '<option value="'+d.country+'"'+(d.births<=0?' disabled':'')+'>'+d.country+(d.births<=0?'（0）':'')+'</option>');
+      els.wish1.innerHTML=html; els.wish2.innerHTML=html; els.wish3.innerHTML=html;
+    }
+
+    function selectedCountries(){
+      return uniq([els.wish1.value,els.wish2.value,els.wish3.value].filter(Boolean)).slice(0,3);
+    }
+
+    function criteriaTargets(){
+      const con = els.continent.value;
+      const gmin = Number(els.gdpMin.value || 0);
+      const hmin = Number(els.hdiLevel.value || 0);
+      return sourceGlobal.filter(d =>
+        (con? d.Continent===con : true) &&
+		(gmin > 0 ? d.gdp_pc > gmin : true) &&   // 同上：0 就是不篩
+		(hmin > 0 ? d.HDI >= hmin : true) &&
+        d.births > 0
+      ).map(d=>d.country);
+    }
+
+    function getTargetSet(){
+      const picks = selectedCountries();
+      if (picks.length>0) return {mode:'指定國家', list:picks};
+      const crit = criteriaTargets();
+      return {mode:'條件模式', list:crit};
+    }
+
+    function updateGoalUI(){
+      const tset = getTargetSet();
+      els.modeLabel.textContent = tset.mode;
+      if (tset.mode==='指定國家'){
+        els.wishLabel.textContent = tset.list.length? tset.list.join('、') : '—';
+      } else {
+        const con = els.continent.value;
+        const gmin = Number(els.gdpMin.value || 0);
+        const hmin = Number(els.hdiLevel.value || 0);
+        const condText = (con? ('洲別='+con+'、'):'') + 'GDP/人 ≥ '+fmt(gmin)+'、HDI ≥ '+(hmin? hmin : '（不限）');
+        els.wishLabel.textContent = '符合條件的任一國家（'+condText+'）';
+      }
+      const pSum = tset.list.reduce((s,name)=>{
+        const d=sourceGlobal.find(x=>x.country===name);
+        return s + (d? d.births/totalBirthsGlobal : 0);
+      },0);
+      els.pLabel.textContent = pSum? (pSum*100).toFixed(5)+'%':'—';
+      els.expTry.textContent = pSum? Math.round(1/pSum).toLocaleString('zh-TW') : '—';
+
+      if (tset.mode==='條件模式'){
+        els.targetsInfo.innerHTML = '符合條件的國家數：<b>'+tset.list.length+'</b>（僅列前 25 國）：　' + tset.list.slice(0,25).join('、');
+      } else {
+        els.targetsInfo.innerHTML = '';
+      }
+
+      const enable = tset.list.length>0 && totalBirthsGlobal>0;
+      els.nextBtn.disabled = !enable; els.autoBtn.disabled = !enable;
+    }
+
+    function refreshTop(){
+      const top=[...sourceGlobal].sort((a,b)=>b.births-a.births).slice(0,12);
+      els.topList.innerHTML='<b>（全球）出生人數 Top</b>' + top.map((d,i)=>'<div class="li"><span>'+(i+1)+'. '+d.country+'</span><span>'+fmt(d.births)+'</span></div>').join('');
+    }
+
+    function pickCountry(){
+      const pos = sourceGlobal.filter(d=>d.births>0 && d.country);
+      if(pos.length===0) return null;
+      const total = pos.reduce((s,d)=>s+d.births,0);
+      let r = Math.random()*total;
+      for(const d of pos){
+        if(r < d.births) return d;
+        r -= d.births;
+      }
+      return pos[pos.length-1];
+    }
+
+    function resetSim(){winner=null;triesCount=0;els.timeline.innerHTML='';els.progress.style.width='0%';els.tries.textContent='0';}
+    function startSim(){ const tset=getTargetSet(); if(tset.list.length===0){alert('請指定至少一個國家，或設定 GDP/人 與 HDI（必要時可選洲別）以使用條件模式。');return;} resetSim(); nextGen(); }
+    function addCard(row,hitLabel){
+      triesCount++; els.tries.textContent=triesCount;
+      const div=document.createElement('div');
+      div.className='gen'+(hitLabel?' win':'');
+      const name = row && row.country ? row.country : '（未知）';
+      div.innerHTML='<div style="font-size:12px;color:'+(hitLabel?'#39d98a':'#9bb3d0')+'">第 '+triesCount+' 世</div><div style="font-size:16px;font-weight:700">'+name+(hitLabel?' ✅ 命中：'+hitLabel:'')+'</div>';
+      els.timeline.appendChild(div);
+      const tset=getTargetSet();
+      const pSum=tset.list.reduce((s,name)=>{
+        const d=sourceGlobal.find(x=>x.country===name);
+        return s + (d? d.births/totalBirthsGlobal : 0);
+      },0);
+      const exp=pSum?1/pSum:Infinity; els.progress.style.width=Math.min(100,Math.round(triesCount/exp*100))+'%';
+    }
+    function nextGen(){
+      if(winner) return;
+      const draw = pickCountry();
+      if(!draw){ alert('全球資料為空或出生人數全為 0。'); return; }
+      const tset=getTargetSet();
+      const hit = tset.list.includes(draw.country) ? (tset.mode==='指定國家' ? draw.country : '符合條件') : null;
+      addCard(draw, hit);
+      if(hit){ winner=hit; els.nextBtn.disabled=true; playing=false; els.autoBtn.textContent='自動播放'; }
+    }
+    function toggleAuto(){
+      const tset=getTargetSet();
+      if(tset.list.length===0){alert('請先指定國家或設定 GDP/人 + HDI 條件'); return;}
+      playing=!playing; els.autoBtn.textContent=playing?'停止自動':'自動播放';
+      if(!playing) return;
+      (function loop(){ if(winner){playing=false; els.autoBtn.textContent='自動播放';return;} nextGen(); setTimeout(loop, Number(els.speed.value)||300); })();
+    }
+
+    [els.wish1,els.wish2,els.wish3].forEach(sel=> sel.addEventListener('change', updateGoalUI));
+    [els.continent, els.gdpMin, els.hdiLevel].forEach(el=> el.addEventListener('change', applyFilters));
+    els.startBtn.addEventListener('click', startSim);
+    els.nextBtn.addEventListener('click', nextGen);
+    els.autoBtn.addEventListener('click', toggleAuto);
+    window.addEventListener('keydown', e=>{ if(e.code==='Space'){ e.preventDefault(); if(!els.nextBtn.disabled) nextGen(); } if(e.key==='s'||e.key==='S'){ e.preventDefault(); startSim(); }});
+
+    buildContinentOptions();
+    applyFilters();
+    updateGoalUI();
+    refreshTop();
+
+    if (document.getElementById('wish1').options.length<=1 && sourceGlobal.length){
+      let opts = '<option value="">（不選）</option>' + sourceGlobal.slice().sort((a,b)=>String(a.country).localeCompare(String(b.country),'zh-TW')).map(d=>'<option value="'+d.country+'">'+d.country+'</option>').join('');
+      document.getElementById('wish1').innerHTML=opts; document.getElementById('wish2').innerHTML=opts; document.getElementById('wish3').innerHTML=opts;
+    }
+    if (document.getElementById('continent').options.length<=1){
+      const cons = uniq(sourceGlobal.map(d=>d.Continent).filter(Boolean)).sort((a,b)=>String(a).localeCompare(String(b),'zh-TW'));
+      document.getElementById('continent').innerHTML = '<option value="">（全部洲別）</option>' + cons.map(c=>'<option>'+c+'</option>').join('');
+    }
+  });
+})();
+</script>
+</body>
+</html>
