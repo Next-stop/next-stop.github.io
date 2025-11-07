@@ -38,8 +38,8 @@ small{color:var(--muted)}
 </head>
 <body>
 <div class="wrap">
-  <h1>下輩子是哪裡人？ <span class="pill">🎲 以各國/地區 <b>2024年全球出生人數當作機率</span></h1>
-  <div class="sub">機率以「<b>全球</b> 出生人數」為母體計算。你可以 A) 指定國家/地區（最多 3 個），或 B) <b>不選國家/地區</b>、僅用「洲別、GDP/人、HDI」作為條件，抽到「符合條件的」即視為成功。</div>
+  <h1>下輩子是哪裡人？ <span class="pill">🎲 以各國/地區 <b>2024年出生人數當作機率</span></h1>
+  <div class="sub">機率以「<b>全球</b> 出生人數」為母體計算。你可以 A) 指定國家/地區（最多 3 個），或 B) <b>不選國家/地區</b>、僅用「洲別、人均國內生產毛額(GDP/人)、人類發展指數(HDI)」作為條件，抽到「符合條件的」即視為成功。</div>
 
   <div class="grid">
     <div class="card stack">
@@ -54,13 +54,13 @@ small{color:var(--muted)}
         </div>
         <div class="row">
           <div class="pill" style="gap:12px"><span>洲別（可不選）：</span><select id="continent"><option value="">（全部洲別）</option></select></div>
-          <div class="pill" style="gap:12px"><span>GDP/人（USD）≥</span>
+          <div class="pill" style="gap:12px"><span>人均國內生產毛額(GDP/人)≥</span>
             <select id="gdpMin">
               <option value="0">（不限）</option>
-              <option value="5000">&gt; 5,000</option>
-              <option value="10000">&gt; 10,000</option>
-              <option value="30000">&gt; 30,000</option>
-              <option value="50000">&gt; 50,000</option>
+              <option value="5000">&gt; 5,000 (USD)</option>
+              <option value="10000">&gt; 10,000 (USD)</option>
+              <option value="30000">&gt; 30,000 (USD)</option>
+              <option value="50000">&gt; 50,000 (USD)</option>
             </select>
           </div>
           <div class="pill" style="gap:12px"><span>人類發展指數 (HDI)：</span>
